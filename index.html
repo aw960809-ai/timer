@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>極限控制訓練</title>
+  <style>
+    body{
+      font-family:'Microsoft JhengHei','Arial',sans-serif;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:100vh;margin:0;background-color:#1a1a1a;color:#fff;
+      transition:background-color .5s ease;overflow-x:hidden;user-select:none;
+      padding:16px 0;-webkit-tap-highlight-color:transparent;
+    }
+    .bg-idle{background-color:#1a1a1a;}
+
+    .theme-seductive .bg-prepare{background-color:#e67e22;}
+    .theme-innocent .bg-prepare{background-color:#f1c40f;}
+    .theme-yandere .bg-prepare{background-color:#2c3e50;}
+    .theme-yandere .bg-action{background-color:#c0392b;}
+    .theme-yandere .bg-rest{background-color:#000;}
+    .theme-succubus .bg-prepare{background-color:#8e44ad;}
+    .theme-succubus .bg-action{background-color:#ff00bf;}
+    .theme-succubus .bg-rest{background-color:#4b0082;}
+
+    .theme-jock .bg-prepare{background-color:#d35400;}
+    .theme-junior .bg-prepare{background-color:#16a085;}
+    .theme-straight .bg-prepare{background-color:#34495e;}
+
+    [class*="theme-"] .bg-action{background-color:#e84393;}
+    [class*="theme-"] .bg-rest{background-color:#2c3e50;}
+
+    .theme-jock .bg-action{background-color:#e67e22;}
+    .theme-junior .bg-action{background-color:#1abc9c;}
+    .theme-straight .bg-action{background-color:#3498db;}
+    .theme-jock .bg-rest{background-color:#5d4037;}
+    .theme-junior .bg-rest{background-color:#004d40;}
+    .theme-straight .bg-rest{background-color:#0d47a1;}
+
+    .container{
+      width:90%;max-width:600px;text-align:center;padding:18px;border-radius:20px;
+      margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);
+    }
+    h1{font-size:26px;margin:0 0 8px;text-shadow:2px 2px 4px rgba(0,0,0,.5);}
+    .subtitle{font-size:14px;opacity:.8;margin-bottom:16px;}
+
+    .debug{
+      width:90%;max-width:600px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:14px;
+      padding:10px 12px;
+      box-sizing:border-box;
+      margin-bottom:12px;
+      text-align:left;
+      font-size:13px;
+      line-height:1.35;
+      word-break:break-word;
+    }
+
+    .character-buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:14px;}
+    .character-btn{
+      padding:12px 16px;border:none;border-radius:50px;font-size:15px;font-weight:900;
+      cursor:pointer;min-width:110px;
+    }
+    .character-btn:active{transform:scale(.98);}
+    .female-btn{background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;}
+    .male-btn{background:linear-gradient(135deg,#3498db,#0984e3);color:#fff;}
+
+    .phase-text{font-size:18px;margin:6px 0 8px;min-height:34px;}
+    .timer-display{font-size:64px;font-weight:900;margin:10px 0 10px;text-shadow:0 0 20px rgba(255,255,255,.5);}
+
+    .progress-bar{width:100%;height:10px;background:rgba(255,255,255,.1);border-radius:5px;margin:10px 0 6px;overflow:hidden;}
+    .progress{height:100%;width:0%;background:linear-gradient(90deg,#00b894,#00cec9);border-radius:5px;transition:width .2s linear;}
+
+    .control-buttons{display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+    .control-btn{
+      padding:13px 18px;font-size:16px;border:none;border-radius:50px;cursor:pointer;
+      font-weight:900;min-width:120px;
+    }
+    .start-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;}
+    .pause-btn{background:linear-gradient(135deg,#fdcb6e,#e17055);color:#fff;}
+    .reset-btn{background:linear-gradient(135deg,#636e72,#2d3436);color:#fff;}
+    .control-btn:disabled{opacity:.45;cursor:not-allowed;}
+
+    .settings{
+      background:rgba(255,255,255,.1);padding:14px;border-radius:15px;margin-top:14px;
+      width:100%;box-sizing:border-box;text-align:left;
+    }
+    .setting-item{margin-bottom:10px;}
+    label{display:block;margin-bottom:6px;font-size:14px;}
+    input[type="number"]{
+      width:100%;padding:10px;border-radius:10px;border:2px solid rgba(255,255,255,.2);
+      background:rgba(0,0,0,.3);color:#fff;font-size:15px;box-sizing:border-box;
+    }
+
+    .history{
+      width:90%;max-width:600px;background:rgba(255,255,255,.06);border-radius:16px;
+      padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);box-sizing:border-box;
+    }
+    .history-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+    .history h2{font-size:16px;margin:0;}
+    .history-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .small-btn{
+      padding:10px 12px;border:none;border-radius:999px;cursor:pointer;font-weight:900;
+      background:rgba(255,255,255,.12);color:#fff;
+    }
+    .history-list{margin:0;padding:0;list-style:none;max-height:220px;overflow:auto;}
+    .history-item{padding:10px 12px;background:rgba(0,0,0,.25);border-radius:12px;margin-bottom:8px;line-height:1.35;font-size:13px;}
+    .muted{opacity:.75;}
+    textarea{
+      width:100%;height:120px;box-sizing:border-box;
+      background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.2);
+      border-radius:12px;padding:10px;margin-top:10px;display:none;
+    }
+  </style>
+</head>
+
+<body class="bg-idle">
+  <div class="debug" id="debugBox">
+    Debug：等待操作…
+  </div>
+
+  <div class="container" id="app">
+    <h1>極限控制訓練</h1>
+    <div class="subtitle">選擇角色 → 開始訓練（OneCompiler 版修復）</div>
+
+    <div class="character-buttons">
+      <button class="character-btn female-btn" data-character="seductive">御姐</button>
+      <button class="character-btn female-btn" data-character="innocent">JK</button>
+      <button class="character-btn female-btn" data-character="yandere">病嬌</button>
+      <button class="character-btn female-btn" data-character="succubus">魅魔</button>
+      <button class="character-btn male-btn" data-character="jock">體育生</button>
+      <button class="character-btn male-btn" data-character="junior">學弟</button>
+      <button class="character-btn male-btn" data-character="straight">直男</button>
+    </div>
+
+    <div class="phase-text" id="phaseText">請選擇角色開始訓練</div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+
+    <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
+
+    <div class="control-buttons">
+      <button class="control-btn start-btn" id="startBtn" data-action="start">開始訓練</button>
+      <button class="control-btn pause-btn" id="pauseBtn" data-action="pause" disabled>暫停</button>
+      <button class="control-btn reset-btn" id="resetBtn" data-action="reset">重置</button>
+      <button class="control-btn reset-btn" id="modeBtn" data-action="mode" style="min-width:160px;">模式：一般</button>
+    </div>
+
+    <div class="settings">
+      <div class="setting-item">
+        <label for="prepareTime">準備時間 (秒)</label>
+        <input type="number" id="prepareTime" value="10" min="5" max="300" />
+      </div>
+      <div class="setting-item">
+        <label for="actionTime">行動時間 (秒)</label>
+        <input type="number" id="actionTime" value="30" min="10" max="600" />
+      </div>
+      <div class="setting-item">
+        <label for="restTime">休息時間 (秒)</label>
+        <input type="number" id="restTime" value="20" min="5" max="300" />
+      </div>
+      <div class="setting-item">
+        <label for="cycles">循環次數</label>
+        <input type="number" id="cycles" value="3" min="1" max="20" />
+      </div>
+    </div>
+  </div>
+
+  <div class="history">
+    <div class="history-header">
+      <h2>歷史紀錄</h2>
+      <div class="history-actions">
+        <button class="small-btn" id="exportBtn" data-action="export">匯出</button>
+        <button class="small-btn" id="clearBtn" data-action="clear">清除</button>
+      </div>
+    </div>
+    <ul class="history-list" id="historyList"></ul>
+    <div class="muted" id="historyHint" style="margin-top:8px;font-size:13px;"></div>
+    <textarea id="exportArea" readonly></textarea>
+  </div>
+
+  <script>
+    // ===== Debug =====
+    const debugBox = document.getElementById("debugBox");
+    function debug(msg){
+      debugBox.textContent = "Debug：" + msg;
+    }
+
+    // ===== 狀態 =====
+    let currentCharacter = null;
+    let timer = null;
+
+    let timeLeft = 0;
+    let phaseTotal = 0;
+
+    let currentPhase = 'idle'; // idle, prepare, action, rest
+    let currentCycle = 0;
+    let totalCycles = 3;
+
+    let isRunning = false;
+    let isPaused = false;
+
+    let teaseMode = "clean"; // clean | adult
+    let lastTeaseLine = "";
+
+    const characterConfig = {
+      seductive: { name: "御姐" },
+      innocent: { name: "JK" },
+      yandere: { name: "病嬌" },
+      succubus: { name: "魅魔" },
+      jock: { name: "體育生" },
+      junior: { name: "學弟" },
+      straight: { name: "直男" }
+    };
+
+    const teaseLinesClean = {
+      seductive: { select:["敢選我，就要撐到最後。"], prepare:["先把呼吸收好。"], action:["照我的節奏走。"], rest:["休息可以，但別放鬆。"], finish:["表現不錯。"] },
+      innocent:  { select:["你真的選我嗎…"], prepare:["慢慢來就好。"], action:["加油！別停！"], rest:["先休息一下。"], finish:["辛苦了…"] },
+      yandere:   { select:["選我就別想逃。"], prepare:["把雜念清掉。"], action:["不准停。"], rest:["休息，但不准離開。"], finish:["很好，你很乖。"] },
+      succubus:  { select:["讓我看看你的意志。"], prepare:["先熱身…"], action:["繼續…別躲。"], rest:["我允許你喘口氣。"], finish:["真乖。"] },
+      jock:      { select:["別怕強度。"], prepare:["姿勢做對。"], action:["衝！別停！"], rest:["喘口氣，下一輪更狠。"], finish:["漂亮！"] },
+      junior:    { select:["我會努力跟上你…"], prepare:["準備好就點頭。"], action:["再一下！"], rest:["我幫你算時間。"], finish:["我替你記下來了！"] },
+      straight:  { select:["行，開始。"], prepare:["準備好就別找藉口。"], action:["撐完。"], rest:["休息，別浪費時間。"], finish:["結束。"] }
+    };
+
+    // 成人版台詞：請你自己填（留空會自動回退一般版）
+    const teaseLinesAdult = {
+      seductive:{select:[],prepare:[],action:[],rest:[],finish:[]},
+      innocent:{select:[],prepare:[],action:[],rest:[],finish:[]},
+      yandere:{select:[],prepare:[],action:[],rest:[],finish:[]},
+      succubus:{select:[],prepare:[],action:[],rest:[],finish:[]},
+      jock:{select:[],prepare:[],action:[],rest:[],finish:[]},
+      junior:{select:[],prepare:[],action:[],rest:[],finish:[]},
+      straight:{select:[],prepare:[],action:[],rest:[],finish:[]}
+    };
+
+    // ===== DOM =====
+    const phaseTextEl = document.getElementById('phaseText');
+    const timerDisplayEl = document.getElementById('timerDisplay');
+    const progressBarEl = document.getElementById('progressBar');
+
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const modeBtn = document.getElementById('modeBtn');
+
+    const prepareInput = document.getElementById('prepareTime');
+    const actionInput = document.getElementById('actionTime');
+    const restInput = document.getElementById('restTime');
+    const cyclesInput = document.getElementById('cycles');
+
+    const historyListEl = document.getElementById('historyList');
+    const historyHintEl = document.getElementById('historyHint');
+    const exportArea = document.getElementById('exportArea');
+
+    // ===== 儲存（OneCompiler 有時禁 localStorage：做 try/catch）=====
+    const HISTORY_KEY = "extreme_control_training_history_onecompiler_v1";
+    function loadHistory(){
+      try{
+        const raw = localStorage.getItem(HISTORY_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      }catch{ return []; }
+    }
+    function saveHistory(arr){
+      try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); }catch{}
+    }
+
+    // ===== 工具 =====
+    function clampInt(value, min, max, fallback){
+      const n = Number.parseInt(value, 10);
+      if (Number.isNaN(n)) return fallback;
+      return Math.min(max, Math.max(min, n));
+    }
+    function formatMMSS(totalSeconds){
+      const s = Math.max(0, totalSeconds|0);
+      const mm = String(Math.floor(s/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      return `${mm}:${ss}`;
+    }
+    function setTimerDisplay(seconds){ timerDisplayEl.textContent = formatMMSS(seconds); }
+    function setProgress(pct){
+      const v = Math.min(100, Math.max(0, pct));
+      progressBarEl.style.width = v + "%";
+    }
+    function applyPhaseBackground(){
+      document.body.classList.remove("bg-idle","bg-prepare","bg-action","bg-rest");
+      document.body.classList.add(`bg-${currentPhase}`);
+    }
+    function setBodyTheme(characterKey){
+      document.body.className = document.body.className
+        .split(/\s+/).filter(c => !c.startsWith("theme-") && !c.startsWith("bg-")).join(" ").trim();
+      if (characterKey) document.body.classList.add(`theme-${characterKey}`);
+      applyPhaseBackground();
+    }
+    function getSettings(){
+      const prepare = clampInt(prepareInput.value, 5, 300, 10);
+      const action  = clampInt(actionInput.value, 10, 600, 30);
+      const rest    = clampInt(restInput.value, 5, 300, 20);
+      const cycles  = clampInt(cyclesInput.value, 1, 20, 3);
+
+      prepareInput.value = prepare;
+      actionInput.value = action;
+      restInput.value = rest;
+      cyclesInput.value = cycles;
+
+      return {prepare, action, rest, cycles};
+    }
+    function setControlsState(){
+      startBtn.disabled = !currentCharacter || isRunning;
+      pauseBtn.disabled = !isRunning;
+      pauseBtn.textContent = isPaused ? "繼續" : "暫停";
+      modeBtn.textContent = `模式：${teaseMode === "adult" ? "成人" : "一般"}`;
+    }
+
+    // ===== 調戲 =====
+    function pick(arr){ return arr && arr.length ? arr[Math.floor(Math.random()*arr.length)] : ""; }
+    function getTeaseDict(){ return teaseMode === "adult" ? teaseLinesAdult : teaseLinesClean; }
+    function setPhaseTextBase(text){ phaseTextEl.textContent = text; }
+    function showTease(phaseKey){
+      if (!currentCharacter) return;
+
+      const dict = getTeaseDict();
+      const line = pick(dict[currentCharacter]?.[phaseKey]);
+      const fallback = pick(teaseLinesClean[currentCharacter]?.[phaseKey]);
+      const finalLine = line || fallback;
+      if (!finalLine) return;
+
+      lastTeaseLine = finalLine;
+      phaseTextEl.textContent = `${phaseTextEl.textContent} —「${finalLine}」`;
+    }
+
+    // ===== 歷史 UI =====
+    function renderHistory(){
+      const arr = loadHistory();
+      historyListEl.innerHTML = "";
+
+      if (!arr.length){
+        historyListEl.innerHTML = `<li class="history-item muted">尚無紀錄。</li>`;
+        historyHintEl.textContent = "";
+        return;
+      }
+
+      for (const item of arr){
+        const li = document.createElement("li");
+        li.className = "history-item";
+        li.innerHTML = `
+          <div><strong>${item.characterName}</strong> <span class="muted">${item.endedAt}</span></div>
+          <div class="muted">週期:${item.cycles} 準備:${item.prepare}s 行動:${item.action}s 休息:${item.rest}s 總:${formatMMSS(item.totalSeconds)}</div>
+          <div class="muted">狀態:${item.status}｜模式:${item.teaseMode}${item.lastTease ? `｜「${item.lastTease}」` : ""}</div>
+        `;
+        historyListEl.appendChild(li);
+      }
+      historyHintEl.textContent = `已保存 ${arr.length} 筆（最多 100 筆）。`;
+    }
+    function addHistoryRecord(record){
+      const arr = loadHistory();
+      arr.unshift(record);
+      if (arr.length > 100) arr.length = 100;
+      saveHistory(arr);
+      renderHistory();
+    }
+    function clearHistory(){
+      // 不用 confirm（OneCompiler 可能擋）
+      saveHistory([]);
+      renderHistory();
+      debug("已清除歷史紀錄");
+    }
+    function exportHistory(){
+      exportArea.style.display = "block";
+      exportArea.value = JSON.stringify(loadHistory(), null, 2);
+      exportArea.focus();
+      exportArea.select();
+      debug("已在下方文字框顯示匯出 JSON（可全選複製）");
+    }
+
+    // ===== 核心流程 =====
+    function selectCharacter(key){
+      if (!characterConfig[key]) return;
+      if (isRunning) { debug("訓練中不可切換角色"); return; }
+
+      currentCharacter = key;
+      lastTeaseLine = "";
+
+      setBodyTheme(key);
+      currentPhase = "idle";
+      applyPhaseBackground();
+
+      setPhaseTextBase(`已選擇角色：${characterConfig[key].name}（可開始訓練）`);
+      showTease("select");
+
+      setTimerDisplay(0);
+      setProgress(0);
+      setControlsState();
+      debug(`選角：${key}`);
+    }
+
+    function startTraining(){
+      if (!currentCharacter){ debug("請先選擇角色"); return; }
+      if (isRunning) return;
+
+      const {prepare, action, rest, cycles} = getSettings();
+      totalCycles = cycles;
+
+      isRunning = true;
+      isPaused = false;
+      currentCycle = 1;
+
+      startPhase("prepare", prepare);
+      setControlsState();
+      debug("開始訓練");
+    }
+
+    function pauseTraining(){
+      if (!isRunning) return;
+
+      if (!isPaused){
+        isPaused = true;
+        if (timer) clearInterval(timer);
+        timer = null;
+        phaseTextEl.textContent = phaseTextEl.textContent.replace(/（已暫停）$/, "") + "（已暫停）";
+        debug("暫停");
+      }else{
+        isPaused = false;
+        phaseTextEl.textContent = phaseTextEl.textContent.replace(/（已暫停）$/, "");
+        tickStart();
+        debug("繼續");
+      }
+      setControlsState();
+    }
+
+    function resetTraining(){
+      if (timer) clearInterval(timer);
+      timer = null;
+
+      isRunning = false;
+      isPaused = false;
+      currentPhase = "idle";
+      currentCycle = 0;
+      timeLeft = 0;
+      phaseTotal = 0;
+
+      applyPhaseBackground();
+
+      setPhaseTextBase(currentCharacter
+        ? `已選擇角色：${characterConfig[currentCharacter].name}（已重置）`
+        : "請選擇角色開始訓練"
+      );
+
+      setTimerDisplay(0);
+      setProgress(0);
+      setControlsState();
+      debug("重置");
+    }
+
+    function toggleMode(){
+      teaseMode = teaseMode === "adult" ? "clean" : "adult";
+      setControlsState();
+      phaseTextEl.textContent = phaseTextEl.textContent.replace(/\s—「.*」\s*$/, "");
+      showTease(currentPhase === "idle" ? "select" : currentPhase);
+      debug(`切換模式：${teaseMode}`);
+    }
+
+    function startPhase(phase, seconds){
+      currentPhase = phase;
+      timeLeft = seconds;
+      phaseTotal = seconds;
+
+      applyPhaseBackground();
+
+      const name = characterConfig[currentCharacter]?.name ?? "";
+      if (phase === "prepare") setPhaseTextBase(`${name}｜第 ${currentCycle}/${totalCycles} 輪：準備`);
+      if (phase === "action")  setPhaseTextBase(`${name}｜第 ${currentCycle}/${totalCycles} 輪：行動`);
+      if (phase === "rest")    setPhaseTextBase(`${name}｜休息（下一輪：${Math.min(currentCycle+1,totalCycles)}/${totalCycles}）`);
+
+      showTease(phase);
+
+      setTimerDisplay(timeLeft);
+      setProgress(0);
+      tickStart();
+    }
+
+    function tickStart(){
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => {
+        if (!isRunning || isPaused) return;
+
+        timeLeft -= 1;
+        setTimerDisplay(timeLeft);
+        const pct = phaseTotal > 0 ? ((phaseTotal - timeLeft) / phaseTotal) * 100 : 0;
+        setProgress(pct);
+
+        if (timeLeft <= 0){
+          clearInterval(timer);
+          timer = null;
+          nextStep();
+        }
+      }, 1000);
+    }
+
+    function nextStep(){
+      const {prepare, action, rest, cycles} = getSettings();
+      totalCycles = cycles;
+
+      if (currentPhase === "prepare") return startPhase("action", action);
+
+      if (currentPhase === "action"){
+        if (currentCycle >= totalCycles) return finishTraining();
+        return startPhase("rest", rest);
+      }
+
+      if (currentPhase === "rest"){
+        currentCycle += 1;
+        return startPhase("prepare", prepare);
+      }
+    }
+
+    function finishTraining(){
+      isRunning = false;
+      isPaused = false;
+
+      currentPhase = "idle";
+      applyPhaseBackground();
+
+      const {prepare, action, rest, cycles} = getSettings();
+      const totalSeconds = prepare * cycles + action * cycles + rest * Math.max(0, cycles - 1);
+
+      setPhaseTextBase(`訓練完成：${characterConfig[currentCharacter]?.name ?? ""}｜共 ${cycles} 輪｜總時長 ${formatMMSS(totalSeconds)}`);
+      showTease("finish");
+
+      setTimerDisplay(0);
+      setProgress(100);
+
+      addHistoryRecord({
+        endedAt: new Date().toLocaleString(),
+        status: "完成",
+        characte 
