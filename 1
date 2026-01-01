@@ -1,0 +1,13 @@
+```html
+<!doctype html>
+<html lang="zh-TW">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OK</title></head>
+<body style="background:#111;color:#fff;font-family:Arial,'Microsoft JhengHei'">
+  <h1>GitHub Pages OK</h1>
+  <button id="b">點我</button>
+  <p id="p">等待點擊</p>
+  <script>
+    document.getElementById('b').onclick=()=>document.getElementById('p').textContent='收到點擊 '+new Date().toLocaleTimeString();
+  </script>
+</body>
+</html>
