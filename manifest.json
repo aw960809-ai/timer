@@ -1,0 +1,8 @@
+{
+  "name": "極限控制訓練",
+  "short_name": "訓練",
+  "start_url": "./?pwa=1",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111"
+}
