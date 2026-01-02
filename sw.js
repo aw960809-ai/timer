@@ -1,9 +1,9 @@
-const CACHE = "timer-pwa-v1";
+const CACHE = "timer-pwa-v2003";
 const ASSETS = [
   "./",
   "./index.html",
-  "./app.css?v=1",
-  "./app.js?v=1",
+  "./app.css?v=2003",
+  "./app.js?v=2003",
   "./manifest.json"
 ];
 
@@ -13,7 +13,9 @@ self.addEventListener("install", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(k => (k === CACHE ? null : caches.delete(k)))))
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => (k === CACHE ? null : caches.delete(k))))
+    )
   );
 });
 
