@@ -1,39 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="theme-color" content="#111111" />
   <title>極限控制訓練</title>
-  <style>
-    body{
-      font-family:'Microsoft JhengHei','Arial',sans-serif;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      min-height:100vh;margin:0;background-color:#1a1a1a;color:#fff;
-      transition:background-color .5s ease;overflow-x:hidden;user-select:none;
-      padding:16px 0;-webkit-tap-highlight-color:transparent;
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./app.css?v=1" />
+</head>
+
+<body class="bg-idle">
+  <div class="debug" id="debugBox">Debug：載入中…</div>
+
+  <div class="container">
+    <h1>極限控制訓練</h1>
+    <div class="subtitle">PWA 版（可加入主畫面、支援離線）</div>
+
+    <div class="character-buttons">
+      <button class="character-btn female-btn" data-character="seductive">御姐</button>
+      <button class="character-btn female-btn" data-character="innocent">JK</button>
+      <button class="character-btn female-btn" data-character="yandere">病嬌</button>
+      <button class="character-btn female-btn" data-character="succubus">魅魔</button>
+      <button class="character-btn male-btn" data-character="jock">體育生</button>
+      <button class="character-btn male-btn" data-character="junior">學弟</button>
+      <button class="character-btn male-btn" data-character="straight">直男</button>
+    </div>
+
+    <div class="phase-text" id="phaseText">請選擇角色開始訓練</div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+
+    <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
+
+    <div class="control-buttons">
+      <button class="control-btn start-btn" id="startBtn">開始訓練</button>
+      <button class="control-btn pause-btn" id="pauseBtn" disabled>暫停</button>
+      <button class="control-btn reset-btn" id="resetBtn">重置</button>
+      <button class="control-btn reset-btn" id="modeBtn" style="min-width:160px;">模式：一般</button>
+    </div>
+
+    <div class="settings">
+      <div class="setting-item">
+        <label for="prepareTime">準備時間 (秒)</label>
+        <input type="number" id="prepareTime" value="10" min="5" max="300" />
+      </div>
+      <div class="setting-item">
+        <label for="actionTime">行動時間 (秒)</label>
+        <input type="number" id="actionTime" value="30" min="10" max="600" />
+      </div>
+      <div class="setting-item">
+        <label for="restTime">休息時間 (秒)</label>
+        <input type="number" id="restTime" value="20" min="5" max="300" />
+      </div>
+      <div class="setting-item">
+        <label for="cycles">循環次數</label>
+        <input type="number" id="cycles" value="3" min="1" max="20" />
+      </div>
+    </div>
+  </div>
+
+  <div class="history">
+    <div class="history-header">
+      <h2>歷史紀錄</h2>
+      <div class="history-actions">
+        <button class="small-btn" id="exportBtn">匯出</button>
+        <button class="small-btn" id="clearBtn">清除</button>
+      </div>
+    </div>
+    <ul class="history-list" id="historyList"></ul>
+    <div class="muted" id="historyHint" style="margin-top:8px;font-size:13px;"></div>
+    <textarea id="exportArea" readonly></textarea>
+  </div>
+
+  <script src="./app.js?v=1" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
-    .bg-idle{background-color:#1a1a1a;}
-
-    .theme-seductive .bg-prepare{background-color:#e67e22;}
-    .theme-innocent .bg-prepare{background-color:#f1c40f;}
-    .theme-yandere .bg-prepare{background-color:#2c3e50;}
-    .theme-yandere .bg-action{background-color:#c0392b;}
-    .theme-yandere .bg-rest{background-color:#000;}
-    .theme-succubus .bg-prepare{background-color:#8e44ad;}
-    .theme-succubus .bg-action{background-color:#ff00bf;}
-    .theme-succubus .bg-rest{background-color:#4b0082;}
-
-    .theme-jock .bg-prepare{background-color:#d35400;}
-    .theme-junior .bg-prepare{background-color:#16a085;}
-    .theme-straight .bg-prepare{background-color:#34495e;}
-
-    [class*="theme-"] .bg-action{background-color:#e84393;}
-    [class*="theme-"] .bg-rest{background-color:#2c3e50;}
-
-    .theme-jock .bg-action{background-color:#e67e22;}
-    .theme-junior .bg-action{background-color:#1abc9c;}
-    .theme-straight .bg-action{background-color:#3498db;}
-    .theme-jock .bg-rest{background-color:#5d4037;}
+  </script>
+</body>
+</html>
     .theme-junior .bg-rest{background-color:#004d40;}
     .theme-straight .bg-rest{background-color:#0d47a1;}
 
